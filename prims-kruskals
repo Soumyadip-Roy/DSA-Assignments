@@ -1,0 +1,218 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+#define inf 9999
+const int N = 1e3;
+
+int graph[N][N];
+
+void Prims(int v)
+{
+    int dist[v];
+    int par[v];
+    int vis[v];
+
+    for (int i = 0; i < v; i++)
+    {
+        dist[i] = inf;
+        vis[i] = 0;
+        par[i] = -1;
+    }
+
+    vector<pair<pair<int, int>, int>> MSTedges;
+
+    dist[0] = 0;
+    int u = 0;
+
+    for (int it = 0; it < v - 1; it++)
+    {
+        vis[u] = 1;
+        int mn = inf;
+
+        for (int i = 0; i < v; i++)
+        {
+            // dist of all the vertex connected to u are updated if they are not visited
+            if (!vis[i] and graph[u][i] < dist[i])
+            {
+                dist[i] = graph[u][i];
+                par[i] = u;
+            }
+            cout<<dist[i]<<" "<<par[i]<<endl;
+        }
+        cout<<endl;
+        // findParing the minimum distance
+        for (int i = 0; i < v; i++)
+        {
+            if (!vis[i] and dist[i] < mn)
+            {
+                mn = dist[i];
+                u = i;
+            }
+        }
+        cout<<u<<endl;
+        MSTedges.push_back({{par[u], u}, mn});
+    }
+
+    // For displaying the result
+    int sum = 0;
+
+    for (auto it : MSTedges)
+    {
+        cout << it.first.first << " - " << it.first.second << " : " << it.second << endl;
+        sum += it.second;
+    }
+    cout << "Weight of MST : " << sum << endl;
+}
+
+void Union(int x, int y, int par[], int v)
+{
+    // parent of x and y
+    int tempx = par[x];
+    int tempy = par[y];
+
+    // setting parent of all vertex tempx whose parent is either tempx or tempy
+    for (int i = 0; i < v; i++)
+    {
+        if (par[i] == tempx or par[i] == tempy)
+        {
+            par[i] = tempx;
+        }
+    }
+}
+
+int findPar(int x, int par[])
+{
+    return par[x];
+}
+
+void Kruskal(int v)
+{
+    int par[v];
+
+    for (int i = 0; i < v; i++)
+        par[i] = i;
+
+    vector<pair<int, pair<int, int>>> edges;
+    vector<pair<int, pair<int, int>>> MSTedges;
+
+    for (int i = 0; i < v; i++)
+    {
+        for (int j = 0; j < v; j++)
+        {
+            if (graph[i][j] != inf)
+            {
+                edges.push_back({graph[i][j], {i, j}});
+            }
+        }
+    }
+
+    sort(edges.begin(), edges.end());
+
+    for (auto it : edges)
+    {
+        if (findPar(it.second.first, par) != findPar(it.second.second, par))
+        {
+            Union(it.second.first, it.second.second, par, v);
+
+            MSTedges.push_back({it.first, {it.second.first, it.second.second}});
+        }
+    }
+    int sum = 0;
+    for (auto it : MSTedges)
+    {
+        cout << it.second.first << " - " << it.second.second << "  : " << it.first << endl;
+        sum += it.first;
+    }
+    cout << "Weight of MST : " << sum << endl;
+}
+
+int main()
+{
+    int v = 0, op = 0, op1 = 1, op2 = 0, src = 0, dest = 0, weight = 0;
+
+    do
+    {
+        cout << "Choose The Desired Option:\n";
+        cout << "1 - Add a New Graph\n";
+        cout << "2 - MST using Prim's Algorithm\n";
+        cout << "3 - MST using Kruskal's Algorithm\n";
+        cout << "0 - EXIT";
+
+        cin >> op;
+
+        switch (op)
+        {
+        case 1:
+            cout << "Enter the number of vertices : ";
+            cin >> v;
+
+            for (int i = 0; i < v; i++)
+            {
+                for (int j = 0; j < v; j++)
+                {
+                    graph[i][j] = inf;
+                }
+            }
+
+            while (op1)
+            {
+                cout << "1. Add Edges" << endl;
+                cout << "2. Delete Edge" << endl;
+                cout << "0. Main Menu" << endl;
+                cout << "Enter your choice : ";
+
+                cin >> op1;
+                switch (op1)
+                {
+                case 1:
+                    cout << "Enter the number of edges you want to add : ";
+                    int op2;
+                    cin >> op2;
+                    for (int i = 0; i < op2; i++)
+                    {
+                        cout << "Enter the first vertex : ";
+                        cin >> src;
+                        cout << "Enter the second vertex : ";
+                        cin >> dest;
+                        cout << "Enter the weight of the edge : ";
+                        cin >> weight;
+
+                        graph[src][dest] = weight;
+                        graph[dest][src] = weight;
+                    }
+                    break;
+                case 2:
+                    cout << "Enter the first vertex : ";
+                    cin >> src;
+                    cout << "Enter the second vertex : ";
+                    cin >> dest;
+
+                    graph[src][dest] = inf;
+                    graph[dest][src] = inf;
+                    break;
+                default:
+                    op1 = 0;
+                    break;
+                }
+            }
+            for (int i = 0; i < v; i++)
+            {
+                for (int j = 0; j < v; j++)
+                {
+                    cout << graph[i][j]<<" ";
+                }
+                cout << endl;
+            }
+            break;
+        case 2:
+            Prims(v);
+            break;
+        case 3:
+            Kruskal(v);
+            break;
+        default:
+            op = 0;
+            break;
+        }
+    } while (op != 0);
+}
